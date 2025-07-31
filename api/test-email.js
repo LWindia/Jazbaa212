@@ -1,7 +1,7 @@
-import nodemailer from 'nodemailer';
+const nodemailer = require('nodemailer');
 
 // Create transporter for custom email service
-const transporter = nodemailer.createTransporter({
+const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
     user: process.env.EMAIL_USER || 'technical@lwindia.com',
@@ -9,7 +9,7 @@ const transporter = nodemailer.createTransporter({
   }
 });
 
-export default async function handler(req, res) {
+module.exports = async (req, res) => {
   // Enable CORS
   res.setHeader('Access-Control-Allow-Origin', 'https://www.lwjazbaa.com');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -51,6 +51,9 @@ export default async function handler(req, res) {
 
   } catch (error) {
     console.error('❌ Email connection test failed:', error);
-    res.status(500).json({ message: 'Email connection test failed' });
+    res.status(500).json({ 
+      message: 'Email connection test failed',
+      error: error.message 
+    });
   }
-} 
+}; 

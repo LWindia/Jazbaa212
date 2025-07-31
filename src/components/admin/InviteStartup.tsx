@@ -93,9 +93,9 @@ const InviteStartup: React.FC = () => {
       console.log('Invite added to Firestore:', docRef.id);
 
       // Send real email using Nodemailer server
-      const emailSent = await sendRealInviteEmail(email.trim(), token);
+      const emailResult = await sendRealInviteEmail(email.trim(), token);
       
-      if (emailSent) {
+      if (emailResult.success) {
         const inviteLink = `https://www.lwjazbaa.com/register/${token}`;
         setMessage({ 
           type: 'success', 
@@ -116,7 +116,8 @@ const InviteStartup: React.FC = () => {
 📧 Invite link: ${inviteLink}
 📋 Please send this link manually to: ${email.trim()}
 
-⚠️ Check server logs for email error details.`
+⚠️ Error: ${emailResult.error || 'Unknown error'}
+🔧 Check Vercel function logs for details.`
         });
       }
       setEmail('');

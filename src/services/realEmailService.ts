@@ -6,11 +6,11 @@ const API_BASE_URL = process.env.NODE_ENV === 'production'
   : 'http://localhost:3002/api';
 
 // Send invite email using Nodemailer server
-export const sendRealInviteEmail = async (email: string, token: string): Promise<boolean> => {
+export const sendRealInviteEmail = async (email: string, token: string): Promise<{ success: boolean; error?: string }> => {
   try {
     console.log('📧 Sending real invite email to:', email);
     
-    const response = await fetch(`${API_BASE_URL}/api/send-invite`, {
+    const response = await fetch(`${API_BASE_URL}/send-invite`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -25,16 +25,22 @@ export const sendRealInviteEmail = async (email: string, token: string): Promise
     if (response.ok) {
       const result = await response.json();
       console.log('✅ Real invite email sent successfully:', result);
-      return true;
+      return { success: true };
     } else {
       const error = await response.json();
       console.error('❌ Real invite email error:', error);
-      return false;
+      return { 
+        success: false, 
+        error: error.error || error.message || 'Failed to send email' 
+      };
     }
     
   } catch (error) {
     console.error('❌ Real invite email error:', error);
-    return false;
+    return { 
+      success: false, 
+      error: error instanceof Error ? error.message : 'Network error' 
+    };
   }
 };
 
@@ -43,7 +49,7 @@ export const sendRealWelcomeEmail = async (email: string, startupName: string, s
   try {
     console.log('📧 Sending real welcome email to:', email);
     
-    const response = await fetch(`${API_BASE_URL}/api/send-welcome`, {
+    const response = await fetch(`${API_BASE_URL}/send-welcome`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -76,7 +82,7 @@ export const testRealEmailConnection = async (): Promise<boolean> => {
   try {
     console.log('🧪 Testing real email connection...');
     
-    const response = await fetch(`${API_BASE_URL}/api/test-email`, {
+    const response = await fetch(`${API_BASE_URL}/test-email`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
