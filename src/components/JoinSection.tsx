@@ -84,9 +84,15 @@ const JoinSection = () => {
               <h4 className="text-lg text-[#e86888] font-semibold mb-4">{action.subtitle}</h4>
               <p className="text-white/70 mb-6 leading-relaxed">{action.description}</p>
               
-              <button className="w-full bg-gradient-to-r from-[#e86888] to-[#7d7eed] text-white py-3 rounded-lg font-medium opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center gap-2">
-                Get Started <ArrowRight size={16} />
-              </button>
+              <a 
+                href="https://forms.gle/XjWnUj15kodZTVrD9" 
+                target="_blank" 
+                rel="noopener noreferrer"
+              >
+                <button className="w-full bg-gradient-to-r from-[#e86888] to-[#7d7eed] text-white py-3 rounded-lg font-medium opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center gap-2">
+                  Get Started <ArrowRight size={16} />
+                </button>
+              </a>
             </motion.div>
           ))}
         </div>
@@ -103,9 +109,15 @@ const JoinSection = () => {
               Join thousands of students, mentors, and industry leaders who are 
               building the future of India, one startup at a time.
             </p>
-            <button className="bg-gradient-to-r from-[#e86888] to-[#7d7eed] text-white px-12 py-4 rounded-full font-semibold text-xl transition-all duration-300 hover:scale-105 hover:shadow-2xl">
-              Join JAZBAA Today
-            </button>
+            <a 
+              href="https://forms.gle/XjWnUj15kodZTVrD9" 
+              target="_blank" 
+              rel="noopener noreferrer"
+            >
+              <button className="bg-gradient-to-r from-[#e86888] to-[#7d7eed] text-white px-12 py-4 rounded-full font-semibold text-xl transition-all duration-300 hover:scale-105 hover:shadow-2xl">
+                Join JAZBAA Today
+              </button>
+            </a>
           </div>
         </motion.div>
       </div>
@@ -113,4 +125,4 @@ const JoinSection = () => {
   );
 };
 
-export default JoinSection; 
+export default JoinSection;

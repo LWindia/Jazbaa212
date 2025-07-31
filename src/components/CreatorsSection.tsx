@@ -128,10 +128,11 @@ const CreatorsSection = () => {
                   {creator.status}
                 </span>
                 {creator.hasPitch && (
-                  <button className="w-full mt-3 bg-gradient-to-r from-[#e86888] to-[#7d7eed] text-white py-2 rounded-lg font-medium opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center gap-2">
-                    <Play size={16} />
-                    Watch My Pitch
-                  </button>
+              <button className="w-full mt-3 bg-gradient-to-r from-[#e86888] to-[#7d7eed] text-white py-2 rounded-lg font-medium transition-all duration-300 flex items-center justify-center gap-2">
+              <Play size={16} />
+              Watch My Pitch
+            </button>
+     
                 )}
               </div>
             </motion.div>
