@@ -1,0 +1,16 @@
+{
+  "name": "jazbaa-api",
+  "version": "1.0.0",
+  "description": "JAZBAA Email API Functions",
+  "main": "index.js",
+  "dependencies": {
+    "nodemailer": "^7.0.5"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+} 

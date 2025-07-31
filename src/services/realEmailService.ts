@@ -2,8 +2,8 @@
 // This service will use our Express server with Nodemailer for sending real emails
 
 const API_BASE_URL = process.env.NODE_ENV === 'production' 
-  ? 'https://www.lwjazbaa.com' 
-  : 'http://localhost:3002';
+  ? 'https://www.lwjazbaa.com/api' 
+  : 'http://localhost:3002/api';
 
 // Send invite email using Nodemailer server
 export const sendRealInviteEmail = async (email: string, token: string): Promise<boolean> => {
