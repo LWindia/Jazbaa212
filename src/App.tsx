@@ -3,6 +3,8 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import Login from './components/auth/Login';
 import Register from './components/auth/Register';
+import InvestorLogin from './components/auth/InvestorLogin';
+import InvestorRegister from './components/auth/InvestorRegister';
 import SetupFirebase from './components/SetupFirebase';
 import InvestorDashboard from './components/dashboard/InvestorDashboard';
 import CollegeDashboard from './components/dashboard/CollegeDashboard';
@@ -19,6 +21,7 @@ import GallerySection from './components/GallerySection';
 import JoinSection from './components/JoinSection';
 import Footer from './components/Footer';
 import InviteStartup from './components/admin/InviteStartup';
+import InviteInvestor from './components/admin/InviteInvestor';
 import EmailTest from './components/admin/EmailTest';
 import StartupRegistration from './components/startup/StartupRegistration';
 import StartupProfileTemplate from './components/startup/StartupProfileTemplate';
@@ -116,6 +119,9 @@ const AppContent: React.FC = () => {
           {/* Public Routes */}
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/investor-login" element={<InvestorLogin />} />
+          <Route path="/investor-register" element={<InvestorRegister />} />
+          <Route path="/investor-register/:token" element={<InvestorRegister />} />
           
           {/* Startup Registration Route */}
           <Route path="/register/:token" element={<StartupRegistration />} />
@@ -155,6 +161,14 @@ const AppContent: React.FC = () => {
             element={
               <ProtectedRoute allowedRoles={['admin']}>
                 <InviteStartup />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/admin/invite-investor" 
+            element={
+              <ProtectedRoute allowedRoles={['admin']}>
+                <InviteInvestor />
               </ProtectedRoute>
             } 
           />

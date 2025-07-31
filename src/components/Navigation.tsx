@@ -127,12 +127,50 @@ const Navigation = () => {
                 </div>
               ) : (
                 <div className="flex items-center space-x-4 ml-4">
-                  <Link
-                    to="/login"
-                    className="text-white hover:text-[#e86888] px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200"
-                  >
-                    Login
-                  </Link>
+                  <div className="relative group">
+                    <button className="text-white hover:text-[#e86888] px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200">
+                      Login
+                    </button>
+                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+                      <Link
+                        to="/login"
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      >
+                        👨‍🎓 Student/Startup
+                      </Link>
+                      <Link
+                        to="/investor-login"
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      >
+                        💼 Investor
+                      </Link>
+                      <Link
+                        to="/college-login"
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      >
+                        🏫 College
+                      </Link>
+                    </div>
+                  </div>
+                  <div className="relative group">
+                    <button className="text-white hover:text-[#e86888] px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200">
+                      Register
+                    </button>
+                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+                      <Link
+                        to="/register"
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      >
+                        👨‍🎓 Student/Startup
+                      </Link>
+                      <Link
+                        to="/investor-register"
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      >
+                        💼 Investor
+                      </Link>
+                    </div>
+                  </div>
                 </div>
               )}
             </div>
@@ -195,12 +233,42 @@ const Navigation = () => {
                 </div>
               ) : (
                 <div className="border-t border-white/20 pt-4 mt-4 space-y-2">
-                  <Link
-                    to="/login"
-                    className="text-white hover:text-[#e86888] block px-3 py-2 rounded-md text-base font-medium w-full text-left transition-colors duration-200"
-                  >
-                    Login
-                  </Link>
+                  <div className="px-3 py-2">
+                    <p className="text-white text-sm font-medium mb-2">Login Options:</p>
+                    <Link
+                      to="/login"
+                      className="text-white hover:text-[#e86888] block px-3 py-2 rounded-md text-base font-medium w-full text-left transition-colors duration-200"
+                    >
+                      👨‍🎓 Student/Startup
+                    </Link>
+                    <Link
+                      to="/investor-login"
+                      className="text-white hover:text-[#e86888] block px-3 py-2 rounded-md text-base font-medium w-full text-left transition-colors duration-200"
+                    >
+                      💼 Investor
+                    </Link>
+                    <Link
+                      to="/college-login"
+                      className="text-white hover:text-[#e86888] block px-3 py-2 rounded-md text-base font-medium w-full text-left transition-colors duration-200"
+                    >
+                      🏫 College
+                    </Link>
+                  </div>
+                  <div className="px-3 py-2">
+                    <p className="text-white text-sm font-medium mb-2">Register Options:</p>
+                    <Link
+                      to="/register"
+                      className="text-white hover:text-[#e86888] block px-3 py-2 rounded-md text-base font-medium w-full text-left transition-colors duration-200"
+                    >
+                      👨‍🎓 Student/Startup
+                    </Link>
+                    <Link
+                      to="/investor-register"
+                      className="text-white hover:text-[#e86888] block px-3 py-2 rounded-md text-base font-medium w-full text-left transition-colors duration-200"
+                    >
+                      💼 Investor
+                    </Link>
+                  </div>
                 </div>
               )}
             </div>
