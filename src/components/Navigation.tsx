@@ -136,7 +136,7 @@ const Navigation = () => {
                         to="/login"
                         className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                       >
-                        👨‍🎓 Student/Startup
+                        👨‍🎓 Admin
                       </Link>
                       <Link
                         to="/investor-login"
@@ -153,10 +153,10 @@ const Navigation = () => {
                     </div>
                   </div>
                   <div className="relative group">
-                    <button className="text-white hover:text-[#e86888] px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200">
+                    {/* <button className="text-white hover:text-[#e86888] px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200">
                       Register
-                    </button>
-                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+                    </button> */}
+                    {/* <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
                       <Link
                         to="/register"
                         className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
@@ -169,7 +169,7 @@ const Navigation = () => {
                       >
                         💼 Investor
                       </Link>
-                    </div>
+                    </div> */}
                   </div>
                 </div>
               )}
@@ -254,7 +254,7 @@ const Navigation = () => {
                       🏫 College
                     </Link>
                   </div>
-                  <div className="px-3 py-2">
+                  {/* <div className="px-3 py-2">
                     <p className="text-white text-sm font-medium mb-2">Register Options:</p>
                     <Link
                       to="/register"
@@ -268,7 +268,7 @@ const Navigation = () => {
                     >
                       💼 Investor
                     </Link>
-                  </div>
+                  </div> */}
                 </div>
               )}
             </div>
