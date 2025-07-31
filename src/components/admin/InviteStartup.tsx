@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { collection, addDoc, getDocs, query, orderBy } from 'firebase/firestore';
 import { db } from '../../config/firebase';
 import { useAuth } from '../../contexts/AuthContext';
+import { sendRealInviteEmail } from '../../services/realEmailService';
 
 interface Invite {
   id: string;
@@ -91,18 +92,33 @@ const InviteStartup: React.FC = () => {
       const docRef = await addDoc(collection(db, 'invites'), inviteData);
       console.log('Invite added to Firestore:', docRef.id);
 
-      // For now, we'll simulate email sending
-      const inviteLink = `${window.location.origin}/register/${token}`;
+      // Send real email using Nodemailer server
+      const emailSent = await sendRealInviteEmail(email.trim(), token);
       
-      setMessage({ 
-        type: 'success', 
-        text: `✅ Invite sent successfully to ${email.trim()}! 
-        
+      if (emailSent) {
+        const inviteLink = `https://www.lwjazbaa.com/register/${token}`;
+        setMessage({ 
+          type: 'success', 
+          text: `✅ Invite sent successfully to ${email.trim()}! 
+          
+📧 Email sent automatically via Nodemailer server.
 📧 Invite link: ${inviteLink}
-📋 Please send this link to the recipient manually.
 
-💡 For automatic email sending, configure EmailJS in the email test page.`
-      });
+🎉 The recipient should receive the email shortly!`
+        });
+      } else {
+        const inviteLink = `https://www.lwjazbaa.com/register/${token}`;
+        setMessage({ 
+          type: 'success', 
+          text: `✅ Invite created successfully! 
+          
+📧 Email sending failed, but invite was saved.
+📧 Invite link: ${inviteLink}
+📋 Please send this link manually to: ${email.trim()}
+
+⚠️ Check server logs for email error details.`
+        });
+      }
       setEmail('');
       
       // Refresh invites list
@@ -119,13 +135,13 @@ const InviteStartup: React.FC = () => {
   };
 
   const copyInviteLink = (token: string) => {
-    const inviteLink = `${window.location.origin}/register/${token}`;
+    const inviteLink = `https://www.lwjazbaa.com/register/${token}`;
     navigator.clipboard.writeText(inviteLink);
     setMessage({ type: 'success', text: 'Invite link copied to clipboard!' });
   };
 
   const openInviteLink = (token: string) => {
-    const inviteLink = `${window.location.origin}/register/${token}`;
+    const inviteLink = `https://www.lwjazbaa.com/register/${token}`;
     window.open(inviteLink, '_blank');
   };
 
