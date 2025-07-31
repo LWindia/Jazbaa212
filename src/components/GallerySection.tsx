@@ -6,12 +6,12 @@ const GallerySection = () => {
 
   // Sample images for rotation (you can replace these with your actual image URLs)
   const rotatingImages = [
-    'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=400&h=300&fit=crop',
-    'https://images.unsplash.com/photo-1531482615713-2afd69097998?w=400&h=300&fit=crop',
-    'https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?w=400&h=300&fit=crop',
-    'https://images.unsplash.com/photo-1515187029135-18ee286d815b?w=400&h=300&fit=crop',
-    'https://images.unsplash.com/photo-1552664730-d307ca884978?w=400&h=300&fit=crop',
-    'https://images.unsplash.com/photo-1543269865-cbf427effbad?w=400&h=300&fit=crop'
+    '/assets/gallery/1.jpeg',
+    '/assets/gallery/2.jpeg',
+    '/assets/gallery/3.jpeg',
+    '/assets/gallery/4.jpeg',
+    '/assets/gallery/5.jpeg',
+    '/assets/gallery/6.jpeg'
   ];
 
   // Auto-rotate images every second
