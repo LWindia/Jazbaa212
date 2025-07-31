@@ -1,0 +1,927 @@
+import React, { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
+import { useAuth } from '../../contexts/AuthContext';
+import { collection, getDocs, doc, setDoc, addDoc, deleteDoc } from 'firebase/firestore';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { db, auth } from '../../config/firebase';
+import { Startup, User, Comment } from '../../types/auth';
+import { Zap, ExternalLink, Users, TrendingUp, Building, Plus, UserPlus, Trash2, Edit, Key, MessageCircle, User as UserIcon } from 'lucide-react';
+
+const AdminDashboard: React.FC = () => {
+  const { currentUser } = useAuth();
+  const [startups, setStartups] = useState<Startup[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
+  const [comments, setComments] = useState<Comment[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState('interests');
+  const [showAddUser, setShowAddUser] = useState(false);
+  const [newUser, setNewUser] = useState({
+    email: '',
+    password: '',
+    role: 'investor' as 'investor' | 'college' | 'admin',
+    collegeId: '',
+    investorId: '',
+    displayName: ''
+  });
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      console.log('Fetching admin data...');
+      
+      const [startupsSnapshot, usersSnapshot, commentsSnapshot] = await Promise.all([
+        getDocs(collection(db, 'startups')),
+        getDocs(collection(db, 'users')),
+        getDocs(collection(db, 'comments'))
+      ]);
+      
+      const startupsData = startupsSnapshot.docs.map(doc => {
+        const data = doc.data();
+        console.log('Startup data:', doc.id, data);
+        return {
+          id: doc.id,
+          name: data.name || 'Unknown Startup',
+          pitch: data.pitch || '',
+          sector: data.sector || 'Technology',
+          badges: data.badges || [],
+          special: data.special || null,
+          collegeId: data.collegeId || '',
+          createdBy: data.createdBy || '',
+          createdAt: data.createdAt || new Date(),
+          interestedInvestors: data.interestedInvestors || [],
+          hiringInvestors: data.hiringInvestors || []
+        };
+      }) as Startup[];
+      
+      const usersData = usersSnapshot.docs.map(doc => ({
+        uid: doc.id, // Fixed: use doc.id for uid
+        ...doc.data()
+      })) as User[];
+      
+      const commentsData = commentsSnapshot.docs.map(doc => {
+        const data = doc.data();
+        console.log('Raw comment data:', { id: doc.id, ...data });
+        
+        // Handle timestamp conversion properly
+        let timestamp;
+        if (data.timestamp) {
+          if (data.timestamp.toDate) {
+            timestamp = data.timestamp.toDate();
+          } else if (data.timestamp instanceof Date) {
+            timestamp = data.timestamp;
+          } else {
+            timestamp = new Date(data.timestamp);
+          }
+        } else {
+          timestamp = new Date();
+        }
+        
+        return {
+          id: doc.id,
+          investorId: data.investorId || '',
+          investorName: data.investorName || 'Unknown Investor',
+          startupId: data.startupId || '',
+          comment: data.comment || '',
+          timestamp: timestamp,
+          type: data.type || 'general'
+        };
+      }) as Comment[];
+      
+      console.log('Found startups:', startupsData.length);
+      console.log('Found users:', usersData.length);
+      console.log('Found comments:', commentsData.length);
+      console.log('Comments data:', commentsData);
+      console.log('Comments with details:', commentsData.map(c => ({
+        id: c.id,
+        investorName: c.investorName,
+        startupName: getStartupName(c.startupId),
+        comment: c.comment,
+        type: c.type,
+        timestamp: c.timestamp
+      })));
+      console.log('Startups with investors:', startupsData.filter(s => s.interestedInvestors?.length > 0 || s.hiringInvestors?.length > 0));
+      
+      setStartups(startupsData);
+      setUsers(usersData);
+      setComments(commentsData);
+    } catch (error: any) {
+      console.error('Error fetching admin data:', error);
+      alert(`Error fetching data: ${error.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getInvestorName = (investorId: string) => {
+    const investor = users.find(user => user.uid === investorId);
+    return investor?.email || investorId;
+  };
+
+  const getStartupName = (startupId: string) => {
+    const startup = startups.find(s => s.id === startupId);
+    return startup?.name || startupId;
+  };
+
+  const allInterests = startups.flatMap(startup => {
+    if (!startup) return [];
+    
+    const interestedInvestors = startup.interestedInvestors || [];
+    const hiringInvestors = startup.hiringInvestors || [];
+    
+    return [
+      ...interestedInvestors.map(investorId => ({
+        type: 'investment' as const,
+        investorId,
+        startupId: startup.id,
+        startupName: startup.name,
+        sector: startup.sector
+      })),
+      ...hiringInvestors.map(investorId => ({
+        type: 'hiring' as const,
+        investorId,
+        startupId: startup.id,
+        startupName: startup.name,
+        sector: startup.sector
+      }))
+    ];
+  });
+
+  const handleAddUser = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      console.log('Creating new user:', newUser.email);
+      
+      // Step 1: Create Firebase Auth user
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        newUser.email,
+        newUser.password
+      );
+      
+      console.log('Firebase Auth user created:', userCredential.user.uid);
+      
+      // Step 2: Add user data to Firestore
+      const userData = {
+        uid: userCredential.user.uid,
+        email: newUser.email,
+        role: newUser.role,
+        displayName: newUser.displayName,
+        ...(newUser.collegeId && { collegeId: newUser.collegeId }),
+        ...(newUser.investorId && { investorId: newUser.investorId }),
+        createdAt: new Date()
+      };
+      
+      await setDoc(doc(db, 'users', userCredential.user.uid), userData);
+      
+      // Step 3: Update local state
+      setUsers([...users, userData]);
+      
+      // Step 4: Reset form
+      setNewUser({ 
+        email: '', 
+        password: '', 
+        role: 'investor', 
+        collegeId: '', 
+        investorId: '', 
+        displayName: '' 
+      });
+      setShowAddUser(false);
+      
+      console.log('User created successfully - they can now login!');
+      alert(`User created successfully!\nEmail: ${newUser.email}\nPassword: ${newUser.password}\n\nShare these credentials with the user.`);
+      
+    } catch (error: any) {
+      console.error('Error creating user:', error);
+      if (error.code === 'auth/email-already-in-use') {
+        alert('User with this email already exists!');
+      } else {
+        alert(`Error creating user: ${error.message}`);
+      }
+    }
+  };
+
+  const handleDeleteUser = async (userId: string) => {
+    if (confirm('Are you sure you want to delete this user?')) {
+      try {
+        await deleteDoc(doc(db, 'users', userId));
+        await fetchData();
+        alert('User deleted successfully!');
+      } catch (error: any) {
+        console.error('Error deleting user:', error);
+        alert(`Error deleting user: ${error.message}`);
+      }
+    }
+  };
+
+  const testCommentSubmission = async () => {
+    try {
+      const testComment = {
+        investorId: 'test-investor-id',
+        investorName: 'Test Investor (ram@gmail.com)',
+        startupId: 'test-startup-id',
+        comment: 'This is a test comment from admin dashboard to verify comment storage and display',
+        timestamp: new Date(),
+        type: 'general' as const
+      };
+      
+      console.log('Adding test comment:', testComment);
+      const docRef = await addDoc(collection(db, 'comments'), testComment);
+      
+      console.log('Test comment added with ID:', docRef.id);
+      await fetchData();
+      alert('Test comment added successfully! Check the comments section.');
+    } catch (error: any) {
+      console.error('Error adding test comment:', error);
+      alert(`Error adding test comment: ${error.message}`);
+    }
+  };
+
+  const addRealComment = async () => {
+    try {
+      // Get the first startup and user for testing
+      const firstStartup = startups[0];
+      const firstUser = users.find(u => u.role === 'investor');
+      
+      if (!firstStartup || !firstUser) {
+        alert('No startups or investors found for testing');
+        return;
+      }
+      
+      const realComment = {
+        investorId: firstUser.uid,
+        investorName: firstUser.email || 'Test Investor',
+        startupId: firstStartup.id,
+        comment: `Real test comment for ${firstStartup.name} from ${firstUser.email}`,
+        timestamp: new Date(),
+        type: 'investment' as const
+      };
+      
+      console.log('Adding real test comment:', realComment);
+      const docRef = await addDoc(collection(db, 'comments'), realComment);
+      
+      console.log('Real test comment added with ID:', docRef.id);
+      await fetchData();
+      alert('Real test comment added successfully! Check the comments section.');
+    } catch (error: any) {
+      console.error('Error adding real test comment:', error);
+      alert(`Error adding real test comment: ${error.message}`);
+    }
+  };
+
+  const checkCommentsInDatabase = async () => {
+    try {
+      console.log('Checking comments in database...');
+      const commentsRef = collection(db, 'comments');
+      const querySnapshot = await getDocs(commentsRef);
+      
+      console.log('Total comments in database:', querySnapshot.docs.length);
+      
+      const commentsData = querySnapshot.docs.map(doc => {
+        const data = doc.data();
+        console.log('Comment from database:', { id: doc.id, ...data });
+        return {
+          id: doc.id,
+          ...data
+        };
+      });
+      
+      alert(`Found ${commentsData.length} comments in database. Check console for details.`);
+      console.log('All comments from database:', commentsData);
+    } catch (error: any) {
+      console.error('Error checking comments:', error);
+      alert(`Error checking comments: ${error.message}`);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 to-black flex items-center justify-center">
+        <div className="text-white text-xl">Loading admin dashboard...</div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 to-black py-20">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <motion.div 
+          className="text-center mb-16"
+          initial={{ opacity: 0, y: 50 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+        >
+          <h1 className="text-4xl md:text-5xl font-bold text-white mb-6">
+            Admin Dashboard
+          </h1>
+          <p className="text-xl text-white/80">
+            Welcome, {currentUser?.email}. Manage users and monitor investor interests.
+          </p>
+        </motion.div>
+
+                {/* Tabs */}
+                <div className="flex flex-wrap justify-center gap-4 mb-12">
+                  <button
+                    onClick={() => setActiveTab('interests')}
+                    className={`px-6 py-3 rounded-full font-medium transition-all duration-300 ${
+                      activeTab === 'interests'
+                        ? 'bg-gradient-to-r from-[#e86888] to-[#7d7eed] text-white'
+                        : 'bg-white/10 text-white/70 hover:bg-white/20 hover:text-white'
+                    }`}
+                  >
+                    Investment Interests
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('hiring')}
+                    className={`px-6 py-3 rounded-full font-medium transition-all duration-300 ${
+                      activeTab === 'hiring'
+                        ? 'bg-gradient-to-r from-[#e86888] to-[#7d7eed] text-white'
+                        : 'bg-white/10 text-white/70 hover:bg-white/20 hover:text-white'
+                    }`}
+                  >
+                    Hiring Requests
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('comments')}
+                    className={`px-6 py-3 rounded-full font-medium transition-all duration-300 ${
+                      activeTab === 'comments'
+                        ? 'bg-gradient-to-r from-[#e86888] to-[#7d7eed] text-white'
+                        : 'bg-white/10 text-white/70 hover:bg-white/20 hover:text-white'
+                    }`}
+                  >
+                    Investor Comments
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('users')}
+                    className={`px-6 py-3 rounded-full font-medium transition-all duration-300 ${
+                      activeTab === 'users'
+                        ? 'bg-gradient-to-r from-[#e86888] to-[#7d7eed] text-white'
+                        : 'bg-white/10 text-white/70 hover:bg-white/20 hover:text-white'
+                    }`}
+                  >
+                    Manage Users
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('overview')}
+                    className={`px-6 py-3 rounded-full font-medium transition-all duration-300 ${
+                      activeTab === 'overview'
+                        ? 'bg-gradient-to-r from-[#e86888] to-[#7d7eed] text-white'
+                        : 'bg-white/10 text-white/70 hover:bg-white/20 hover:text-white'
+                    }`}
+                  >
+                    Overview
+                  </button>
+                </div>
+
+                {/* Admin Navigation Links */}
+                <div className="flex flex-wrap justify-center gap-4 mb-8">
+                  <a
+                    href="/admin/invite"
+                    className="px-6 py-3 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-full font-medium transition-all duration-300 hover:scale-105"
+                  >
+                    🚀 Invite Startups
+                  </a>
+                  <a
+                    href="/admin/email-test"
+                    className="px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-full font-medium transition-all duration-300 hover:scale-105"
+                  >
+                    📧 Test Emails
+                  </a>
+                  <a
+                    href="/admin/auth-test"
+                    className="px-6 py-3 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-full font-medium transition-all duration-300 hover:scale-105"
+                  >
+                    🔐 Test Auth
+                  </a>
+                  <a
+                    href="/admin/profile-manager"
+                    className="px-6 py-3 bg-gradient-to-r from-orange-600 to-orange-700 text-white rounded-full font-medium transition-all duration-300 hover:scale-105"
+                  >
+                    📄 Profile Manager
+                  </a>
+                  <a
+                    href="/admin/comment-test" 
+                    className="px-6 py-3 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-full font-medium transition-all duration-300 hover:scale-105"
+                  >
+                    💬 Test Comments
+                  </a>
+                  <a
+                    href="/admin/comment-debug" 
+                    className="px-6 py-3 bg-gradient-to-r from-indigo-600 to-indigo-700 text-white rounded-full font-medium transition-all duration-300 hover:scale-105"
+                  >
+                    🔍 Comment Debug
+                  </a>
+                </div>
+
+        {/* Content based on active tab */}
+        {activeTab === 'interests' && (
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+          >
+            <h2 className="text-2xl font-bold text-white mb-8 text-center">
+              Investment Interests
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {allInterests
+                .filter(interest => interest.type === 'investment')
+                .map((interest, index) => (
+                  <motion.div
+                    key={`${interest.investorId}-${interest.startupId}`}
+                    className="bg-white/5 backdrop-blur-md rounded-2xl p-6 border border-white/10"
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6, delay: index * 0.1 }}
+                  >
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="w-10 h-10 bg-gradient-to-r from-[#e86888] to-[#7d7eed] rounded-full flex items-center justify-center">
+                        <TrendingUp className="text-white" size={20} />
+                      </div>
+                      <div>
+                        <h3 className="text-white font-semibold">Investment Interest</h3>
+                        <p className="text-white/60 text-sm">{interest.sector}</p>
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <div>
+                        <span className="text-white/60 text-sm">Investor:</span>
+                        <p className="text-white font-medium">{getInvestorName(interest.investorId)}</p>
+                      </div>
+                      <div>
+                        <span className="text-white/60 text-sm">Startup:</span>
+                        <p className="text-white font-medium">{interest.startupName}</p>
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
+            </div>
+          </motion.div>
+        )}
+
+        {activeTab === 'hiring' && (
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+          >
+            <h2 className="text-2xl font-bold text-white mb-8 text-center">
+              Hiring Requests
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {allInterests
+                .filter(interest => interest.type === 'hiring')
+                .map((interest, index) => (
+                  <motion.div
+                    key={`${interest.investorId}-${interest.startupId}`}
+                    className="bg-white/5 backdrop-blur-md rounded-2xl p-6 border border-white/10"
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6, delay: index * 0.1 }}
+                  >
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="w-10 h-10 bg-gradient-to-r from-[#7d7eed] to-[#e86888] rounded-full flex items-center justify-center">
+                        <Users className="text-white" size={20} />
+                      </div>
+                      <div>
+                        <h3 className="text-white font-semibold">Hiring Request</h3>
+                        <p className="text-white/60 text-sm">{interest.sector}</p>
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <div>
+                        <span className="text-white/60 text-sm">Investor:</span>
+                        <p className="text-white font-medium">{getInvestorName(interest.investorId)}</p>
+                      </div>
+                      <div>
+                        <span className="text-white/60 text-sm">Startup:</span>
+                        <p className="text-white font-medium">{interest.startupName}</p>
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
+            </div>
+          </motion.div>
+        )}
+
+        {activeTab === 'comments' && (
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+          >
+            <div className="flex justify-between items-center mb-8">
+              <h2 className="text-2xl font-bold text-white">
+                Investor Comments ({comments.length})
+              </h2>
+              <div className="flex gap-2">
+                <button
+                  onClick={fetchData}
+                  className="bg-gradient-to-r from-green-600 to-green-700 text-white px-4 py-2 rounded-lg font-medium transition-all duration-300 hover:scale-105 flex items-center gap-2"
+                >
+                  <MessageCircle size={16} />
+                  Refresh Data
+                </button>
+                <button
+                  onClick={testCommentSubmission}
+                  className="bg-gradient-to-r from-[#e86888] to-[#7d7eed] text-white px-4 py-2 rounded-lg font-medium transition-all duration-300 hover:scale-105 flex items-center gap-2"
+                >
+                  <MessageCircle size={16} />
+                  Test Comment
+                </button>
+                <button
+                  onClick={addRealComment}
+                  className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-all duration-300 hover:scale-105 flex items-center gap-2"
+                >
+                  <MessageCircle size={16} />
+                  Add Real Comment
+                </button>
+                <button
+                  onClick={checkCommentsInDatabase}
+                  className="bg-gradient-to-r from-purple-600 to-purple-700 text-white px-4 py-2 rounded-lg font-medium transition-all duration-300 hover:scale-105 flex items-center gap-2"
+                >
+                  <MessageCircle size={16} />
+                  Check DB Comments
+                </button>
+              </div>
+            </div>
+            {(comments || []).length > 0 ? (
+              <div className="space-y-6">
+                {/* Group comments by investor */}
+                {Object.entries(
+                  comments.reduce((acc, comment) => {
+                    const investorKey = comment.investorId || comment.investorName;
+                    if (!acc[investorKey]) {
+                      acc[investorKey] = [];
+                    }
+                    acc[investorKey].push(comment);
+                    return acc;
+                  }, {} as Record<string, typeof comments>)
+                ).map(([investorKey, investorComments]) => (
+                  <motion.div
+                    key={investorKey}
+                    className="bg-white/5 backdrop-blur-md rounded-2xl p-6 border border-white/10"
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6 }}
+                  >
+                    {/* Investor Header */}
+                    <div className="flex items-center gap-3 mb-6 pb-4 border-b border-white/10">
+                      <div className="w-12 h-12 bg-gradient-to-r from-[#e86888] to-[#7d7eed] rounded-full flex items-center justify-center">
+                        <UserIcon className="text-white" size={24} />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="text-white font-semibold text-lg">
+                          {investorComments[0]?.investorName || 'Unknown Investor'}
+                        </h3>
+                        <p className="text-white/60 text-sm">
+                          Investor ID: {investorKey}
+                        </p>
+                        <p className="text-white/60 text-sm">
+                          Total Comments: {investorComments.length}
+                        </p>
+                      </div>
+                    </div>
+                    
+                    {/* Comments Grid */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {investorComments.map((comment, index) => (
+                        <motion.div
+                          key={comment.id}
+                          className="bg-white/5 backdrop-blur-md rounded-xl p-4 border border-white/10"
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.4, delay: index * 0.1 }}
+                        >
+                          <div className="flex items-start gap-3 mb-3">
+                            <div className="w-8 h-8 bg-gradient-to-r from-green-500 to-blue-500 rounded-full flex items-center justify-center">
+                              <MessageCircle className="text-white" size={16} />
+                            </div>
+                            <div className="flex-1">
+                              <h4 className="text-white font-medium text-sm">
+                                {getStartupName(comment.startupId)}
+                              </h4>
+                              <p className="text-white/60 text-xs">
+                                {new Date(comment.timestamp).toLocaleString()}
+                              </p>
+                            </div>
+                          </div>
+                          
+                          <div className="space-y-2">
+                            <div>
+                              <span className="text-white/60 text-xs">Comment:</span>
+                              <p className="text-white/90 text-sm mt-1">{comment.comment}</p>
+                            </div>
+                            
+                            <div className="flex items-center justify-between">
+                              <span className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${
+                                comment.type === 'investment' ? 'bg-green-500/20 text-green-400' :
+                                comment.type === 'hiring' ? 'bg-blue-500/20 text-blue-400' :
+                                'bg-gray-500/20 text-gray-400'
+                              }`}>
+                                {comment.type}
+                              </span>
+                              <span className="text-white/60 text-xs">
+                                {new Date(comment.timestamp).toLocaleDateString()}
+                              </span>
+                            </div>
+                          </div>
+                        </motion.div>
+                      ))}
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center text-white/60 text-xl">
+                No comments from investors yet.
+              </div>
+            )}
+            
+            {/* Debug Section */}
+            <div className="mt-8 bg-white/5 backdrop-blur-md rounded-2xl p-6 border border-white/10">
+              <h3 className="text-white font-semibold mb-4">Debug Information</h3>
+              <div className="space-y-2 text-sm">
+                <div>
+                  <span className="text-white/60">Total Comments:</span> {comments.length}
+                </div>
+                <div>
+                  <span className="text-white/60">Comments Data:</span>
+                  <pre className="text-white/80 text-xs mt-2 bg-black/20 p-3 rounded-md overflow-auto max-h-40">
+                    {JSON.stringify(comments, null, 2)}
+                  </pre>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+
+        {activeTab === 'users' && (
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+          >
+            <div className="flex justify-between items-center mb-8">
+              <h2 className="text-2xl font-bold text-white">Manage Users</h2>
+              <button
+                onClick={() => setShowAddUser(true)}
+                className="bg-gradient-to-r from-[#e86888] to-[#7d7eed] text-white px-4 py-2 rounded-lg font-medium transition-all duration-300 hover:scale-105 flex items-center gap-2"
+              >
+                <UserPlus size={16} />
+                Add User
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {(users || []).map((user, index) => (
+                <motion.div
+                  key={user.uid}
+                  className="bg-white/5 backdrop-blur-md rounded-2xl p-6 border border-white/10"
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: index * 0.1 }}
+                >
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-10 h-10 bg-gradient-to-r from-[#e86888] to-[#7d7eed] rounded-full flex items-center justify-center">
+                      <Users className="text-white" size={20} />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="text-white font-semibold capitalize">{user.role}</h3>
+                      <p className="text-white/60 text-sm">{user.email}</p>
+                    </div>
+                    <button
+                      onClick={() => handleDeleteUser(user.uid)}
+                      className="text-red-400 hover:text-red-300 transition-colors"
+                      title="Delete user"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    {user.displayName && (
+                      <div>
+                        <span className="text-white/60 text-sm">Name:</span>
+                        <p className="text-white font-medium">{user.displayName}</p>
+                      </div>
+                    )}
+                    {user.collegeId && (
+                      <div>
+                        <span className="text-white/60 text-sm">College ID:</span>
+                        <p className="text-white font-medium">{user.collegeId}</p>
+                      </div>
+                    )}
+                    {user.investorId && (
+                      <div>
+                        <span className="text-white/60 text-sm">Investor ID:</span>
+                        <p className="text-white font-medium">{user.investorId}</p>
+                      </div>
+                    )}
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+
+            {/* Add User Modal */}
+            {showAddUser && (
+              <motion.div
+                className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+              >
+                <motion.div
+                  className="bg-white/10 backdrop-blur-md rounded-2xl p-8 w-full max-w-md border border-white/20"
+                  initial={{ scale: 0.9, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  exit={{ scale: 0.9, opacity: 0 }}
+                >
+                  <h3 className="text-2xl font-bold text-white mb-6">Add New User</h3>
+                  <form onSubmit={handleAddUser} className="space-y-4">
+                    <div>
+                      <label className="block text-white text-sm font-medium mb-2">Email</label>
+                      <input
+                        type="email"
+                        value={newUser.email}
+                        onChange={(e) => setNewUser({...newUser, email: e.target.value})}
+                        className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-[#e86888] transition-colors"
+                        placeholder="Enter email"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-white text-sm font-medium mb-2">Password</label>
+                      <input
+                        type="password"
+                        value={newUser.password}
+                        onChange={(e) => setNewUser({...newUser, password: e.target.value})}
+                        className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-[#e86888] transition-colors"
+                        placeholder="Enter password (min 6 characters)"
+                        minLength={6}
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-white text-sm font-medium mb-2">Display Name</label>
+                      <input
+                        type="text"
+                        value={newUser.displayName}
+                        onChange={(e) => setNewUser({...newUser, displayName: e.target.value})}
+                        className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-[#e86888] transition-colors"
+                        placeholder="Enter display name"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-white text-sm font-medium mb-2">Role</label>
+                      <select
+                        value={newUser.role}
+                        onChange={(e) => setNewUser({...newUser, role: e.target.value as any})}
+                        className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:border-[#e86888] transition-colors"
+                      >
+                        <option value="investor">Investor</option>
+                        <option value="college">College</option>
+                        <option value="admin">Admin</option>
+                      </select>
+                    </div>
+                    {newUser.role === 'college' && (
+                      <div>
+                        <label className="block text-white text-sm font-medium mb-2">College ID</label>
+                        <input
+                          type="text"
+                          value={newUser.collegeId}
+                          onChange={(e) => setNewUser({...newUser, collegeId: e.target.value})}
+                          className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-[#e86888] transition-colors"
+                          placeholder="Enter college ID"
+                          required
+                        />
+                      </div>
+                    )}
+                    {newUser.role === 'investor' && (
+                      <div>
+                        <label className="block text-white text-sm font-medium mb-2">Investor ID</label>
+                        <input
+                          type="text"
+                          value={newUser.investorId}
+                          onChange={(e) => setNewUser({...newUser, investorId: e.target.value})}
+                          className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-[#e86888] transition-colors"
+                          placeholder="Enter investor ID"
+                          required
+                        />
+                      </div>
+                    )}
+                    <div className="bg-blue-500/20 border border-blue-500/50 rounded-lg p-4 mt-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Key className="text-blue-400" size={16} />
+                        <span className="text-blue-400 font-medium">Login Credentials</span>
+                      </div>
+                      <p className="text-blue-200 text-sm">
+                        The user will be able to login immediately with the email and password you provide.
+                      </p>
+                    </div>
+                    <div className="flex gap-4 mt-6">
+                      <button
+                        type="submit"
+                        className="flex-1 bg-gradient-to-r from-[#e86888] to-[#7d7eed] text-white py-3 rounded-lg font-semibold transition-all duration-300 hover:scale-105"
+                      >
+                        Create User
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setShowAddUser(false)}
+                        className="flex-1 bg-white/10 text-white py-3 rounded-lg font-semibold transition-all duration-300 hover:bg-white/20"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </form>
+                </motion.div>
+              </motion.div>
+            )}
+          </motion.div>
+        )}
+
+        {activeTab === 'overview' && (
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+          >
+            <h2 className="text-2xl font-bold text-white mb-8 text-center">
+              System Overview
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+              <motion.div
+                className="bg-white/5 backdrop-blur-md rounded-2xl p-6 border border-white/10 text-center"
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.1 }}
+              >
+                <Building className="text-white mx-auto mb-4" size={32} />
+                <h3 className="text-3xl font-bold text-white mb-2">{startups.length}</h3>
+                <p className="text-white/70">Total Startups</p>
+              </motion.div>
+
+              <motion.div
+                className="bg-white/5 backdrop-blur-md rounded-2xl p-6 border border-white/10 text-center"
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.2 }}
+              >
+                <Users className="text-white mx-auto mb-4" size={32} />
+                <h3 className="text-3xl font-bold text-white mb-2">
+                  {users.filter(user => user.role === 'investor').length}
+                </h3>
+                <p className="text-white/70">Total Investors</p>
+              </motion.div>
+
+              <motion.div
+                className="bg-white/5 backdrop-blur-md rounded-2xl p-6 border border-white/10 text-center"
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.3 }}
+              >
+                <Building className="text-white mx-auto mb-4" size={32} />
+                <h3 className="text-3xl font-bold text-white mb-2">
+                  {users.filter(user => user.role === 'college').length}
+                </h3>
+                <p className="text-white/70">Total Colleges</p>
+              </motion.div>
+
+              <motion.div
+                className="bg-white/5 backdrop-blur-md rounded-2xl p-6 border border-white/10 text-center"
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.4 }}
+              >
+                <TrendingUp className="text-white mx-auto mb-4" size={32} />
+                <h3 className="text-3xl font-bold text-white mb-2">{allInterests.length}</h3>
+                <p className="text-white/70">Total Interests</p>
+              </motion.div>
+            </div>
+          </motion.div>
+        )}
+
+        {activeTab === 'interests' && allInterests.filter(i => i.type === 'investment').length === 0 && (
+          <div className="text-center text-white/60 text-xl">
+            No investment interests found.
+          </div>
+        )}
+
+        {activeTab === 'hiring' && allInterests.filter(i => i.type === 'hiring').length === 0 && (
+          <div className="text-center text-white/60 text-xl">
+            No hiring requests found.
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default AdminDashboard; 
