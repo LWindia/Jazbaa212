@@ -9,13 +9,13 @@ const HeroSection = () => {
   };
 
   return (
-    <section id="hero" className="relative min-h-screen bg-black overflow-hidden mt-32">
+    <section id="hero" className="relative min-h-screen bg-black overflow-hidden pt-20 md:pt-24">
       {/* White Background Half Section */}
       <div className="absolute bottom-0 left-0 w-full h-1/5 bg-white z-10"></div>
 
       {/* Main Content */}
-      <div className="relative z-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col justify-center" style={{ height: 'calc(100vh - 80px)' }}>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mb-12">
+      <div className="relative z-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col justify-center min-h-screen">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mb-12 pt-8 lg:pt-0">
           {/* Left Side */}
           <div className="text-left">
             <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold leading-tight">
@@ -61,7 +61,7 @@ const HeroSection = () => {
         </div>
 
         {/* Video Section */}
-        <div className="flex justify-center">
+        <div className="flex justify-center pb-8">
           <div className="relative w-full max-w-5xl z-30">
             {!showVideo ? (
               <>
@@ -101,11 +101,11 @@ const HeroSection = () => {
             )}
 
             {/* Quote on White Background */}
-            
-              <p className="text-gray-700 text-xl md:text-2xl font-semibold text-center pt-4">
+            <div className="relative z-40 mt-8">
+              <p className="text-gray-700 text-xl md:text-2xl font-semibold text-center">
                 Our Engineers Can be The Creators - Mr Vimal Daga
               </p>
-           
+            </div>
           </div>
         </div>
       </div>
