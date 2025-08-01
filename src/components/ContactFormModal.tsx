@@ -63,33 +63,46 @@ const ContactFormModal: React.FC<ContactFormModalProps> = ({ isOpen, onClose, co
         ? 'https://www.lwjazbaa.com' 
         : 'http://localhost:3002';
       
-      const response = await fetch(`${apiBaseUrl}/api/contact`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          ...formData,
-          contactType,
-          timestamp: new Date().toISOString()
-        }),
-      });
-
-      if (response.ok) {
-        setIsSubmitted(true);
-        setTimeout(() => {
-          onClose();
-          setIsSubmitted(false);
-          setFormData({ name: '', email: '', phone: '', message: '' });
-        }, 3000);
-      } else {
-        const errorData = await response.json().catch(() => ({}));
-        const errorMessage = errorData.error || errorData.message || `Server error: ${response.status}`;
-        throw new Error(errorMessage);
+              console.log('🌐 Submitting form to:', `${apiBaseUrl}/api/contact`);
+        console.log('📝 Form data:', { ...formData, contactType, timestamp: new Date().toISOString() });
+        
+        const response = await fetch(`${apiBaseUrl}/api/contact`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            ...formData,
+            contactType,
+            timestamp: new Date().toISOString()
+          }),
+        });
+ 
+        console.log('📡 Response status:', response.status);
+        console.log('📡 Response headers:', Object.fromEntries(response.headers.entries()));
+        
+        if (response.ok) {
+          const responseData = await response.json();
+          console.log('✅ Form submitted successfully:', responseData);
+          setIsSubmitted(true);
+          setTimeout(() => {
+            onClose();
+            setIsSubmitted(false);
+            setFormData({ name: '', email: '', phone: '', message: '' });
+          }, 3000);
+        } else {
+          const errorData = await response.text();
+          console.error('❌ Server error response:', errorData);
+          throw new Error(`Server error: ${response.status} - ${errorData}`);
+        }
+      } catch (error) {
+        console.error('❌ Error submitting form:', error);
+        console.error('❌ Error details:', {
+          message: error instanceof Error ? error.message : 'Unknown error',
+          stack: error instanceof Error ? error.stack : undefined
+        });
+        alert(`Failed to submit form: ${error instanceof Error ? error.message : 'Unknown error'}. Please try again.`);
       }
-    } catch (error) {
-      console.error('Error submitting form:', error);
-      alert(`Failed to submit form: ${error.message}. Please try again.`);
     } finally {
       setIsSubmitting(false);
     }
@@ -100,6 +113,32 @@ const ContactFormModal: React.FC<ContactFormModalProps> = ({ isOpen, onClose, co
       ...prev,
       [e.target.name]: e.target.value
     }));
+  };
+
+  // Test API connection
+  const testApiConnection = async () => {
+    try {
+      const isProduction = window.location.hostname !== 'localhost';
+      const apiBaseUrl = isProduction 
+        ? 'https://www.lwjazbaa.com' 
+        : 'http://localhost:3002';
+      
+      console.log('🧪 Testing API connection to:', `${apiBaseUrl}/api/test-contact`);
+      
+      const response = await fetch(`${apiBaseUrl}/api/test-contact`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+      const data = await response.json();
+      
+      console.log('✅ API test successful:', data);
+      alert(`API is working! ${data.message}`);
+    } catch (error) {
+      console.error('❌ API test failed:', error);
+      alert(`API test failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
   };
 
   if (!isOpen) return null;
@@ -196,6 +235,15 @@ const ContactFormModal: React.FC<ContactFormModalProps> = ({ isOpen, onClose, co
                 placeholder="Tell us what you're interested in..."
               />
             </div>
+
+            {/* Test API Button (temporary) */}
+            <button
+              type="button"
+              onClick={testApiConnection}
+              className="w-full bg-gray-500 text-white py-2 px-6 rounded-lg font-semibold hover:bg-gray-600 transition-all duration-300 mb-2"
+            >
+              🧪 Test API Connection
+            </button>
 
             {/* Submit Button */}
             <button
