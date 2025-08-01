@@ -95,14 +95,13 @@ const ContactFormModal: React.FC<ContactFormModalProps> = ({ isOpen, onClose, co
           console.error('❌ Server error response:', errorData);
           throw new Error(`Server error: ${response.status} - ${errorData}`);
         }
-      } catch (error) {
-        console.error('❌ Error submitting form:', error);
-        console.error('❌ Error details:', {
-          message: error instanceof Error ? error.message : 'Unknown error',
-          stack: error instanceof Error ? error.stack : undefined
-        });
-        alert(`Failed to submit form: ${error instanceof Error ? error.message : 'Unknown error'}. Please try again.`);
-      }
+    } catch (error) {
+      console.error('❌ Error submitting form:', error);
+      console.error('❌ Error details:', {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined
+      });
+      alert(`Failed to submit form: ${error instanceof Error ? error.message : 'Unknown error'}. Please try again.`);
     } finally {
       setIsSubmitting(false);
     }
