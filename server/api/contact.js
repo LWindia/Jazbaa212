@@ -1,7 +1,7 @@
 const nodemailer = require('nodemailer');
 
 // Create transporter for Gmail
-const transporter = nodemailer.createTransporter({
+const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
     user: 'intern.linuxworld@gmail.com',
@@ -9,7 +9,7 @@ const transporter = nodemailer.createTransporter({
   }
 });
 
-export default async function handler(req, res) {
+module.exports = async (req, res) => {
   if (req.method !== 'POST') {
     return res.status(405).json({ message: 'Method not allowed' });
   }
