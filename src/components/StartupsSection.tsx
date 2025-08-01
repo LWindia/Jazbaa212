@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Rocket, TrendingUp, Zap, MessageCircle, Send, ExternalLink } from 'lucide-react';
+import { Rocket, TrendingUp, Zap, MessageCircle, Send, ExternalLink, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { collection, getDocs, query, orderBy } from 'firebase/firestore';
 import { db } from '../config/firebase';
@@ -30,6 +30,10 @@ const StartupsSection: React.FC<StartupsSectionProps> = ({
   const [showCommentForm, setShowCommentForm] = useState<string | null>(null);
   const [commentTexts, setCommentTexts] = useState<{ [key: string]: string }>({});
   const [commentTypes, setCommentTypes] = useState<{ [key: string]: 'investment' | 'hiring' | 'general' }>({});
+  
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const cardsPerPage = 6;
 
   const sectors = ['all', 'Technology', 'Healthcare', 'Education', 'Finance', 'E-commerce', 
     'Entertainment', 'Transportation', 'Food & Beverage', 'Real Estate', 
@@ -61,7 +65,7 @@ const StartupsSection: React.FC<StartupsSectionProps> = ({
           try {
             await ensureStartupProfile(startup);
           } catch (profileError) {
-            console.warn('⚠️ Profile creation failed for startup:', startup.name, profileError);
+            console.warn('⚠️ Profile creation failed for startup:', (startup as any).name ?? startup.id, profileError);
           }
         }
 
@@ -72,7 +76,7 @@ const StartupsSection: React.FC<StartupsSectionProps> = ({
         );
 
         console.log('✅ Final unique startups count:', uniqueStartups.length);
-        console.log('✅ Final startups list:', uniqueStartups.map(s => ({ id: s.id, name: s.name, sector: s.sector })));
+        console.log('✅ Final startups list:', uniqueStartups.map(s => ({ id: s.id, name: (s as Startup).name, sector: (s as Startup).sector })));
 
         setStartupsWithIds(uniqueStartups);
       } catch (error) {
@@ -88,9 +92,68 @@ const StartupsSection: React.FC<StartupsSectionProps> = ({
     fetchStartups();
   }, [startups]);
 
+  // Reset to first page when changing tabs
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [activeTab]);
+
   const filteredStartups = activeTab === 'all' 
     ? startupsWithIds 
     : startupsWithIds.filter(startup => startup.sector === activeTab);
+
+  // Calculate pagination
+  const totalPages = Math.ceil(filteredStartups.length / cardsPerPage);
+  const startIndex = (currentPage - 1) * cardsPerPage;
+  const endIndex = startIndex + cardsPerPage;
+  const currentStartups = filteredStartups.slice(startIndex, endIndex);
+
+  const handlePrevPage = () => {
+    setCurrentPage(prev => Math.max(prev - 1, 1));
+  };
+
+  const handleNextPage = () => {
+    setCurrentPage(prev => Math.min(prev + 1, totalPages));
+  };
+
+  const handlePageClick = (pageNumber: number) => {
+    setCurrentPage(pageNumber);
+  };
+
+  // Generate page numbers to show
+  const getPageNumbers = () => {
+    const pages = [];
+    const maxVisiblePages = 5;
+    
+    if (totalPages <= maxVisiblePages) {
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      if (currentPage <= 3) {
+        for (let i = 1; i <= 4; i++) {
+          pages.push(i);
+        }
+        pages.push('...');
+        pages.push(totalPages);
+      } else if (currentPage >= totalPages - 2) {
+        pages.push(1);
+        pages.push('...');
+        for (let i = totalPages - 3; i <= totalPages; i++) {
+          pages.push(i);
+        }
+      } else {
+        pages.push(1);
+        pages.push('...');
+        for (let i = currentPage - 1; i <= currentPage + 1; i++) {
+          pages.push(i);
+        }
+        pages.push('...');
+        pages.push(totalPages);
+      }
+    }
+    
+    return pages;
+  };
 
   return (
     <section className="py-20 bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
@@ -108,7 +171,7 @@ const StartupsSection: React.FC<StartupsSectionProps> = ({
         </div>
 
         {/* Sector Filter Tabs */}
-        <div className="flex flex-wrap justify-center gap-4 mb-12">
+        <div className="flex flex-wrap justify-center gap-4 mb-8">
           {sectors.map((sector) => (
             <button
               key={sector}
@@ -124,17 +187,26 @@ const StartupsSection: React.FC<StartupsSectionProps> = ({
           ))}
         </div>
 
+        {/* Results Info */}
+        {filteredStartups.length > 0 && (
+          <div className="text-center mb-8">
+            <p className="text-white/60">
+              Showing {startIndex + 1}-{Math.min(endIndex, filteredStartups.length)} of {filteredStartups.length} startups
+            </p>
+          </div>
+        )}
+
         {/* Startup Cards */}
         <AnimatePresence mode="wait">
           <motion.div 
-            key={activeTab}
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+            key={`${activeTab}-${currentPage}`}
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.5 }}
           >
-            {filteredStartups.map((startup: any, index: number) => {
+            {currentStartups.map((startup: any, index: number) => {
               console.log('Rendering startup:', startup);
               return (
                 <motion.div
@@ -348,6 +420,59 @@ const StartupsSection: React.FC<StartupsSectionProps> = ({
           </motion.div>
         </AnimatePresence>
 
+        {/* Pagination Controls */}
+        {totalPages > 1 && (
+          <div className="flex justify-center items-center space-x-2">
+            {/* Previous Button */}
+            <button
+              onClick={handlePrevPage}
+              disabled={currentPage === 1}
+              className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-all duration-300 ${
+                currentPage === 1
+                  ? 'bg-white/5 text-white/30 cursor-not-allowed'
+                  : 'bg-white/10 text-white hover:bg-white/20 hover:scale-105'
+              }`}
+            >
+              <ChevronLeft size={18} />
+              <span>Previous</span>
+            </button>
+
+            {/* Page Numbers */}
+            <div className="flex space-x-1">
+              {getPageNumbers().map((page, index) => (
+                <button
+                  key={index}
+                  onClick={() => typeof page === 'number' && handlePageClick(page)}
+                  disabled={page === '...'}
+                  className={`w-10 h-10 rounded-lg font-medium transition-all duration-300 ${
+                    page === currentPage
+                      ? 'bg-gradient-to-r from-[#e86888] to-[#7d7eed] text-white'
+                      : page === '...'
+                      ? 'text-white/50 cursor-default'
+                      : 'bg-white/10 text-white hover:bg-white/20 hover:scale-105'
+                  }`}
+                >
+                  {page}
+                </button>
+              ))}
+            </div>
+
+            {/* Next Button */}
+            <button
+              onClick={handleNextPage}
+              disabled={currentPage === totalPages}
+              className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-all duration-300 ${
+                currentPage === totalPages
+                  ? 'bg-white/5 text-white/30 cursor-not-allowed'
+                  : 'bg-white/10 text-white hover:bg-white/20 hover:scale-105'
+              }`}
+            >
+              <span>Next</span>
+              <ChevronRight size={18} />
+            </button>
+          </div>
+        )}
+
         {filteredStartups.length === 0 && (
           <div className="text-center text-white/60 text-xl">
             No startups found for the selected sector.
@@ -358,4 +483,4 @@ const StartupsSection: React.FC<StartupsSectionProps> = ({
   );
 };
 
-export default StartupsSection; 
+export default StartupsSection;
