@@ -63,6 +63,9 @@ const ContactFormModal: React.FC<ContactFormModalProps> = ({ isOpen, onClose, co
         ? 'https://www.lwjazbaa.com' 
         : 'http://localhost:3002';
       
+      console.log('🌐 Submitting form to:', `${apiBaseUrl}/api/contact`);
+      console.log('📝 Form data:', { ...formData, contactType, timestamp: new Date().toISOString() });
+      
       const response = await fetch(`${apiBaseUrl}/api/contact`, {
         method: 'POST',
         headers: {
@@ -75,7 +78,12 @@ const ContactFormModal: React.FC<ContactFormModalProps> = ({ isOpen, onClose, co
         }),
       });
 
+      console.log('📡 Response status:', response.status);
+      console.log('📡 Response headers:', Object.fromEntries(response.headers.entries()));
+      
       if (response.ok) {
+        const responseData = await response.json();
+        console.log('✅ Form submitted successfully:', responseData);
         setIsSubmitted(true);
         setTimeout(() => {
           onClose();
@@ -83,11 +91,17 @@ const ContactFormModal: React.FC<ContactFormModalProps> = ({ isOpen, onClose, co
           setFormData({ name: '', email: '', phone: '', message: '' });
         }, 3000);
       } else {
-        throw new Error('Failed to submit form');
+        const errorData = await response.text();
+        console.error('❌ Server error response:', errorData);
+        throw new Error(`Server error: ${response.status} - ${errorData}`);
       }
     } catch (error) {
-      console.error('Error submitting form:', error);
-      alert('Failed to submit form. Please try again.');
+      console.error('❌ Error submitting form:', error);
+      console.error('❌ Error details:', {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined
+      });
+      alert(`Failed to submit form: ${error instanceof Error ? error.message : 'Unknown error'}. Please try again.`);
     } finally {
       setIsSubmitting(false);
     }
@@ -98,6 +112,27 @@ const ContactFormModal: React.FC<ContactFormModalProps> = ({ isOpen, onClose, co
       ...prev,
       [e.target.name]: e.target.value
     }));
+  };
+
+  // Test API connection
+  const testApiConnection = async () => {
+    try {
+      const isProduction = window.location.hostname !== 'localhost';
+      const apiBaseUrl = isProduction 
+        ? 'https://www.lwjazbaa.com' 
+        : 'http://localhost:3002';
+      
+      console.log('🧪 Testing API connection to:', `${apiBaseUrl}/api/health`);
+      
+      const response = await fetch(`${apiBaseUrl}/api/health`);
+      const data = await response.json();
+      
+      console.log('✅ API health check successful:', data);
+      alert(`API is working! Environment: ${data.environment}, Email configured: ${data.emailConfigured}`);
+    } catch (error) {
+      console.error('❌ API health check failed:', error);
+      alert(`API test failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
   };
 
   if (!isOpen) return null;
@@ -194,6 +229,15 @@ const ContactFormModal: React.FC<ContactFormModalProps> = ({ isOpen, onClose, co
                 placeholder="Tell us what you're interested in..."
               />
             </div>
+
+            {/* Test API Button (temporary) */}
+            <button
+              type="button"
+              onClick={testApiConnection}
+              className="w-full bg-gray-500 text-white py-2 px-6 rounded-lg font-semibold hover:bg-gray-600 transition-all duration-300 mb-2"
+            >
+              🧪 Test API Connection
+            </button>
 
             {/* Submit Button */}
             <button

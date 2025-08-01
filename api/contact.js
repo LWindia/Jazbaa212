@@ -10,15 +10,32 @@ const transporter = nodemailer.createTransporter({
 });
 
 export default async function handler(req, res) {
+  // Enable CORS for all origins
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  
+  // Handle preflight requests
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+  
   if (req.method !== 'POST') {
     return res.status(405).json({ message: 'Method not allowed' });
   }
 
   try {
+    console.log('📨 Contact form request received:', {
+      method: req.method,
+      headers: req.headers,
+      body: req.body
+    });
+    
     const { name, email, phone, message, contactType, timestamp } = req.body;
 
     // Validate required fields
     if (!name || !email || !message) {
+      console.log('❌ Missing required fields:', { name: !!name, email: !!email, message: !!message });
       return res.status(400).json({ message: 'Missing required fields' });
     }
 
@@ -88,7 +105,9 @@ export default async function handler(req, res) {
       replyTo: email
     };
 
+    console.log('📧 Sending admin notification email...');
     await transporter.sendMail(mailOptions);
+    console.log('✅ Admin notification email sent successfully');
 
     // Send confirmation email to the contact
     const confirmationSubject = 'JAZBAA Contact Request Received';
@@ -129,12 +148,23 @@ export default async function handler(req, res) {
       html: confirmationBody
     };
 
+    console.log('📧 Sending confirmation email to user...');
     await transporter.sendMail(confirmationMailOptions);
+    console.log('✅ Confirmation email sent successfully');
 
+    console.log('✅ Contact form processed successfully');
     res.status(200).json({ message: 'Contact request submitted successfully' });
 
   } catch (error) {
-    console.error('Error sending email:', error);
-    res.status(500).json({ message: 'Failed to submit contact request' });
+    console.error('❌ Error processing contact form:', error);
+    console.error('❌ Error details:', {
+      message: error.message,
+      stack: error.stack,
+      code: error.code
+    });
+    res.status(500).json({ 
+      message: 'Failed to submit contact request',
+      error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+    });
   }
 } 
