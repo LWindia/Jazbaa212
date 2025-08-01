@@ -15,21 +15,24 @@ const JourneySection = () => {
       title: 'Team Formation & Ideation',
       description: 'Students form diverse teams, brainstorm problems, and validate ideas through market research.',
       activities: ['Team Building', 'Problem Identification', 'Market Research', 'Mentor Assignment'],
-      color: 'from-[#e86888] to-[#ff6b6b]'
+      color: 'from-[#e86888] to-[#ff6b6b]',
+      videoUrl: '/assets/video/Day1.mp4' // Replace with actual Day 1 video URL
     },
     {
       day: 'Day 2',
       title: 'UI/UX Design & Planning',
       description: 'Teams create wireframes, design user interfaces on paper, and plan their technical architecture.',
       activities: ['Wireframing', 'UI Design', 'User Journey Mapping', 'Tech Stack Planning'],
-      color: 'from-[#7d7eed] to-[#6c5ce7]'
+      color: 'from-[#7d7eed] to-[#6c5ce7]',
+      videoUrl: '/assets/video/Day2.mp4' // Replace with actual Day 2 video URL
     },
     {
       day: 'Day 3',
       title: 'Prototype & Pitch',
       description: 'Final day to build working prototypes, prepare presentations, and pitch to investors.',
       activities: ['Prototype Development', 'Pitch Preparation', 'Demo Recording', 'Final Presentations'],
-      color: 'from-[#9cecd5] to-[#00b894]'
+      color: 'from-[#9cecd5] to-[#00b894]',
+      videoUrl: 'https://your-video-hosting.com/day3-highlights.mp4' // Replace with actual Day 3 video URL
     }
   ];
 
@@ -91,12 +94,23 @@ const JourneySection = () => {
                 </div>
 
                 <div className="flex-1">
-                  <div className="bg-white/5 backdrop-blur-md rounded-2xl p-8 border border-white/10">
-                    <div className="aspect-video bg-gradient-to-br from-gray-800 to-gray-900 rounded-lg flex items-center justify-center">
-                      <Play className="text-white/60" size={48} />
+                  <div className="bg-white/5 backdrop-blur-md rounded-2xl p-4 border border-white/10">
+                    <div className="aspect-video bg-gradient-to-br from-gray-800 to-gray-900 rounded-lg overflow-hidden">
+                      <video
+                        className="w-full h-full object-cover"
+                        controls
+                        preload="metadata"
+                        poster="" // You can add a poster image URL here
+                      >
+                        <source src={phase.videoUrl} type="video/mp4" />
+                        <div className="flex items-center justify-center h-full">
+                          <Play className="text-white/60" size={48} />
+                        </div>
+                        Your browser does not support the video tag.
+                      </video>
                     </div>
                     <p className="text-white/60 text-sm mt-4 text-center">
-                      Watch {phase.day} highlights and learner stories
+                      {phase.day} highlights and learner stories
                     </p>
                   </div>
                 </div>
@@ -133,4 +147,4 @@ const JourneySection = () => {
   );
 };
 
-export default JourneySection; 
+export default JourneySection;
