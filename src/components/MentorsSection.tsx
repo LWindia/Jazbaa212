@@ -5,123 +5,123 @@ import { useInView } from 'react-intersection-observer';
 const mentors = [
   {
     name: 'Abhayjeet Singh',
-    image: '/assets/mentors/abhayjeet-singh.jpg',
-    description: 'Co-Founder at ImaginXP | Chief Academic Officer at CollegeDekho | Leading Higher Education Innovation and Growth | Public Speaker | Startup Mentor | Innovation Leadership Awardee 2024 by World Innovation Congress'
+    image: '/assets/investors/abhayjeet singh.jpg.jpg',
+    description: 'Co-Founder at ImaginXP | Innovation Leadership Awardee 2024 by World Innovation Congress'
   },
   {
     name: 'Abid MatoO',
-    image: '/assets/mentors/abid-matoo.jpg',
+    image: '/assets/investors/abid matoo.jpg.jpg',
     description: 'Senior Partner Sales Manager at Redhat (GLS)'
   },
   {
     name: 'Dr. Ajay Khunteta',
-    image: '/assets/mentors/ajay-khunteta.jpg',
+    image: '/assets/investors/ajay khunteta.jpg',
     description: 'Professor at Poornima University'
   },
   {
     name: 'Bhavesh Kothari',
-    image: '/assets/mentors/bhavesh-kothari.jpg',
-    description: 'Entrepreneur | Startup Mentor | Author-Eves Against The Odds | Ecosystem Builder | Rated as top 1% influencer by LinkedIn 2017/18/19. Building a Global Investment Platform for Women Entrepreneurs via Billennium Divas!'
+    image: '/assets/investors/bhavesh-kothari.jpeg',
+    description: 'Entrepreneur | Startup Mentor | Author-Eves Against The Odds | Ecosystem Builder'
   },
   {
     name: 'Deepesh Chandran',
-    image: '/assets/mentors/deepesh-chandran.jpg',
+    image: '/assets/investors/deepesh chandran.jpg',
     description: 'Business Storytelling Coach | Professional Storyteller'
   },
   {
     name: 'Dr Pramod Sadarjoshi',
-    image: '/assets/mentors/pramod-sadarjoshi.jpg',
+    image: '/assets/investors/Dr. pramod sadarjoshi.jpg',
     description: 'Managing Partner - Cornerstone International Group - India'
   },
   {
     name: 'Gaurav Sharma',
-    image: '/assets/mentors/gaurav-sharma.jpg',
-    description: 'Social Entrepreneur | Recycling, Sustainability, Impact | 3*CEO, 3*TEDx Speaker, Patrika 40 under 40, Rajeev Circle Fellow, Climate Reality Leader, Startup Mentor, Podcast Host, Former Curator at Global Shapers Jaipur'
+    image: '/assets/investors/GAURAV SHARMA.jpg',
+    description: 'Social Entrepreneur | 3*CEO, 3*TEDx Speaker,Former Curator at Global Shapers Jaipur'
   },
   {
     name: 'Kalpan Desai',
-    image: '/assets/mentors/kalpan-desai.jpg',
-    description: 'CHRO | Purpose-Driven, People-Centric, Business-Focused | Architect of High-Performing Teams | Trusted C-Suite Advisor | Emerging HR Leader - ETHR | XLRI | SHRL | MHRD'
+    image: '/assets/investors/kalpan desai.jpg',
+    description: 'CHRO | Trusted C-Suite Advisor | Emerging HR Leader - ETHR | XLRI | SHRL | MHRD'
   },
   {
     name: 'Mahavir Pratap Sharma',
-    image: '/assets/mentors/mahavir-pratap-sharma.jpg',
-    description: 'General Partner, Swishin Ventures; Past Chair, TiE Global Board of Trustees; Co-Founder and Chair, RAIN (Rajasthan Angels) and Founding Chair, TiE India Angels.'
+    image: '/assets/investors/mahavir-pratap-sharma.jpeg',
+    description: 'GP, Swishin Ventures | Ex-Chair, TiE Global | Chair, RAIN | Founding Chair, TiE India Angels'
   },
   {
     name: 'Namrata Thakker',
-    image: '/assets/mentors/namrata-thakker.jpg',
-    description: 'Entrepreneur Excel | Happy Soul | CapSavvy | Cap70 Angels | Independent Director | IIM Bangalore | Stanford Seed Spark'
+    image: '/assets/investors/namrata thakker.jpg',
+    description: 'Entrepreneur Excel | Happy Soul | CapSavvy | Cap70 Angels | IIM Bangalore | Stanford Seed Spark'
   },
   {
     name: 'Nayan Bheda',
-    image: '/assets/mentors/nayan-bheda.jpg',
+    image: '/assets/investors/nayan-bheda.jpeg',
     description: 'Award-winning Business Accelerator | Investor | Speaker | Serial Entrepreneur'
   },
   {
     name: 'Nikhil Samar',
-    image: '/assets/mentors/nikhil-samar.jpg',
+    image: '/assets/investors/nikhil samar.jpg',
     description: 'Entrepreneur | Angel Investor | Startup Advisor'
   },
   {
     name: 'Paresh Gupta',
-    image: '/assets/mentors/paresh-gupta.jpg',
+    image: '/assets/investors/paresh-gupta.jpeg',
     description: '8 times TEDx Speaker | Founder -GCEC | CUET pro |Business Mentor, Advisor and Motivator'
   },
   {
     name: 'Prateek Mathur',
-    image: '/assets/mentors/prateek-mathur.jpg',
+    image: '/assets/investors/prateek mathur.jpg',
     description: 'Founder : Saaskart | CuriousAI'
   },
   {
     name: 'Puja Agarwal',
-    image: '/assets/mentors/puja-agarwal.jpg',
+    image: '/assets/investors/Puja Agarwal.jpg',
     description: 'Vice President, Arya Group of Colleges-Jaipur'
   },
   {
     name: 'Puneet Datta',
-    image: '/assets/mentors/puneet-datta.jpg',
+    image: '/assets/investors/puneet-datta.jpeg',
     description: 'Solving for Scale @ SysB | Seeding the Future @ All About Startups | Startup Life: All In, All Ways'
   },
   {
     name: 'Rahul Singhi',
-    image: '/assets/mentors/rahul-singhi.jpg',
+    image: '/assets/investors/rahul-singhi.jpg',
     description: 'Co-Founder @ Poornima University, Jaipur & Director at JIET Group of Institutions, Jodhpur'
   },
   {
     name: 'Ramesh Padmanabhan',
-    image: '/assets/mentors/ramesh-padmanabhan.jpg',
+    image: '/assets/investors/Ramesh-Padmanabhan.jpeg',
     description: 'Sr. Vice President, NIIT StackRoute'
   },
   {
     name: 'Reetesh Gautam',
-    image: '/assets/mentors/reetesh-gautam.jpg',
-    description: 'Training & Placement Officer, Head Corporate Affairs B K Birla Institute of Engineering & Technology, Pilani || Building BKBIET, Pilani'
+    image: '/assets/investors/reetesh gautam.jpg',
+    description: 'Training & Placement Officer, Head Corporate Affairs BKBIET , Pilani | Building BKBIET, Pilani'
   },
   {
     name: 'Rishabh Nag',
-    image: '/assets/mentors/rishabh-nag.jpg',
-    description: 'Transforming BI to AI | Founder Humanli.AI | Empowering Data-Driven Decisions for Fortune 2000 | IIMC Alum | McKinsey | GOI Think Tank'
+    image: '/assets/investors/rishabh nag.jpg',
+    description: 'Founder, Humanli.AI | Ex-McKinsey | IIMC Alum | Driving AI-Powered Decisions for Fortune 2000'
   },
   {
     name: 'Sumit Srivastawa',
-    image: '/assets/mentors/sumit-srivastawa.jpg',
+    image: '/assets/investors/sumit srivastava.jpg',
     description: 'Founder & CEO, Startup Chaupal®'
   },
   {
     name: 'Dr. Tanuj Manglani',
-    image: '/assets/mentors/tanuj-manglani.jpg',
-    description: 'Director, Training and Placements | Arya College of Engineering Jaipur'
+    image: '/assets/investors/tanuj manglani.jpg',
+    description: 'Director, T&P | Arya College Jaipur'
   },
   {
     name: 'Vibhuti Sharma',
-    image: '/assets/mentors/vibhuti-sharma.jpg',
+    image: '/assets/investors/vibhuti sharma.jpg',
     description: 'Leadership Coach | Management Consultant'
   },
   {
     name: 'Wamiq Siddiqui',
-    image: '/assets/mentors/wamiq-siddiqui.jpg',
-    description: 'DevOps Architect/Consultant | Agile Delivery Manager | Digital Transformation Leader | FINTECH | DevSecOps | AIOps | MLOps | Explorer | Mentor | Learner | Community Builder | ITIL | CSM® | CSPO® | DevOps Leader (DOL)®'
+    image: '/assets/investors/Wamiq Siddiqui.jpg',
+    description: 'DevOps Architect | Agile & Digital Transformation | DevSecOps | AIOps | Mentor | ITIL | CSM® | CSPO®'
   }
 ];
 
