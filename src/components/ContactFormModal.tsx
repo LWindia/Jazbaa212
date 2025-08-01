@@ -83,11 +83,13 @@ const ContactFormModal: React.FC<ContactFormModalProps> = ({ isOpen, onClose, co
           setFormData({ name: '', email: '', phone: '', message: '' });
         }, 3000);
       } else {
-        throw new Error('Failed to submit form');
+        const errorData = await response.json().catch(() => ({}));
+        const errorMessage = errorData.error || errorData.message || `Server error: ${response.status}`;
+        throw new Error(errorMessage);
       }
     } catch (error) {
       console.error('Error submitting form:', error);
-      alert('Failed to submit form. Please try again.');
+      alert(`Failed to submit form: ${error.message}. Please try again.`);
     } finally {
       setIsSubmitting(false);
     }
