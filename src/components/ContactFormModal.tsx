@@ -57,7 +57,13 @@ const ContactFormModal: React.FC<ContactFormModalProps> = ({ isOpen, onClose, co
     setIsSubmitting(true);
 
     try {
-      const response = await fetch('http://localhost:3001/api/contact', {
+      // Determine API URL based on environment
+      const isProduction = window.location.hostname !== 'localhost';
+      const apiBaseUrl = isProduction 
+        ? 'https://www.lwjazbaa.com' 
+        : 'http://localhost:3002';
+      
+      const response = await fetch(`${apiBaseUrl}/api/contact`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

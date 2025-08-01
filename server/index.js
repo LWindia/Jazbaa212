@@ -294,10 +294,10 @@ app.post('/api/contact', async (req, res) => {
       </div>
     `;
 
-    // Send email to admin
+    // Send email to admin (technical@lwindia.com)
     const mailOptions = {
       from: process.env.EMAIL_USER || 'technical@lwindia.com',
-      to: process.env.EMAIL_USER || 'technical@lwindia.com',
+      to: 'technical@lwindia.com', // Always send to your email
       subject: emailSubject,
       html: emailBody,
       replyTo: email
