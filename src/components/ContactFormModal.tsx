@@ -114,31 +114,7 @@ const ContactFormModal: React.FC<ContactFormModalProps> = ({ isOpen, onClose, co
     }));
   };
 
-  // Test API connection
-  const testApiConnection = async () => {
-    try {
-      const isProduction = window.location.hostname !== 'localhost';
-      const apiBaseUrl = isProduction 
-        ? 'https://www.lwjazbaa.com' 
-        : 'http://localhost:3002';
-      
-      console.log('🧪 Testing API connection to:', `${apiBaseUrl}/api/test-contact`);
-      
-      const response = await fetch(`${apiBaseUrl}/api/test-contact`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        }
-      });
-      const data = await response.json();
-      
-      console.log('✅ API test successful:', data);
-      alert(`API is working! ${data.message}`);
-    } catch (error) {
-      console.error('❌ API test failed:', error);
-      alert(`API test failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
-    }
-  };
+
 
   if (!isOpen) return null;
 
@@ -235,14 +211,7 @@ const ContactFormModal: React.FC<ContactFormModalProps> = ({ isOpen, onClose, co
               />
             </div>
 
-            {/* Test API Button (temporary) */}
-            <button
-              type="button"
-              onClick={testApiConnection}
-              className="w-full bg-gray-500 text-white py-2 px-6 rounded-lg font-semibold hover:bg-gray-600 transition-all duration-300 mb-2"
-            >
-              🧪 Test API Connection
-            </button>
+            
 
             {/* Submit Button */}
             <button
