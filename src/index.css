@@ -24,3 +24,83 @@ select:focus {
   outline: none;
   border-color: #e86888;
 }
+
+/* Heartbeat Animation */
+@keyframes heartbeat {
+  0% { transform: scale(1); }
+  14% { transform: scale(1.1); }
+  28% { transform: scale(1); }
+  42% { transform: scale(1.1); }
+  70% { transform: scale(1); }
+}
+
+.animate-heartbeat {
+  animation: heartbeat 1s ease-in-out;
+}
+
+/* Glow Animation for Liked State */
+@keyframes glow {
+  0% { 
+    box-shadow: 0 0 5px rgba(236, 72, 153, 0.5), 0 0 10px rgba(236, 72, 153, 0.3), 0 0 15px rgba(236, 72, 153, 0.1);
+  }
+  50% { 
+    box-shadow: 0 0 10px rgba(236, 72, 153, 0.8), 0 0 20px rgba(236, 72, 153, 0.5), 0 0 30px rgba(236, 72, 153, 0.3);
+  }
+  100% { 
+    box-shadow: 0 0 5px rgba(236, 72, 153, 0.5), 0 0 10px rgba(236, 72, 153, 0.3), 0 0 15px rgba(236, 72, 153, 0.1);
+  }
+}
+
+.animate-glow {
+  animation: glow 2s ease-in-out infinite;
+}
+
+/* Heart Firework Animations */
+@keyframes heart-firework-1 {
+  0% { transform: translate(-50%, -50%) scale(0); opacity: 1; }
+  100% { transform: translate(-50%, -50%) translate(-20px, -30px) scale(1); opacity: 0; }
+}
+
+@keyframes heart-firework-2 {
+  0% { transform: translate(-50%, -50%) scale(0); opacity: 1; }
+  100% { transform: translate(-50%, -50%) translate(20px, -30px) scale(1); opacity: 0; }
+}
+
+@keyframes heart-firework-3 {
+  0% { transform: translate(-50%, -50%) scale(0); opacity: 1; }
+  100% { transform: translate(-50%, -50%) translate(-30px, -10px) scale(1); opacity: 0; }
+}
+
+@keyframes heart-firework-4 {
+  0% { transform: translate(-50%, -50%) scale(0); opacity: 1; }
+  100% { transform: translate(-50%, -50%) translate(30px, -10px) scale(1); opacity: 0; }
+}
+
+@keyframes heart-firework-5 {
+  0% { transform: translate(-50%, -50%) scale(0); opacity: 1; }
+  100% { transform: translate(-50%, -50%) translate(-20px, 20px) scale(1); opacity: 0; }
+}
+
+@keyframes heart-firework-6 {
+  0% { transform: translate(-50%, -50%) scale(0); opacity: 1; }
+  100% { transform: translate(-50%, -50%) translate(20px, 20px) scale(1); opacity: 0; }
+}
+
+@keyframes heart-firework-7 {
+  0% { transform: translate(-50%, -50%) scale(0); opacity: 1; }
+  100% { transform: translate(-50%, -50%) translate(-10px, -20px) scale(1); opacity: 0; }
+}
+
+@keyframes heart-firework-8 {
+  0% { transform: translate(-50%, -50%) scale(0); opacity: 1; }
+  100% { transform: translate(-50%, -50%) translate(10px, -20px) scale(1); opacity: 0; }
+}
+
+.animate-heart-firework-1 { animation-name: heart-firework-1; }
+.animate-heart-firework-2 { animation-name: heart-firework-2; }
+.animate-heart-firework-3 { animation-name: heart-firework-3; }
+.animate-heart-firework-4 { animation-name: heart-firework-4; }
+.animate-heart-firework-5 { animation-name: heart-firework-5; }
+.animate-heart-firework-6 { animation-name: heart-firework-6; }
+.animate-heart-firework-7 { animation-name: heart-firework-7; }
+.animate-heart-firework-8 { animation-name: heart-firework-8; }

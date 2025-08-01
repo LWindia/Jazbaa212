@@ -8,6 +8,7 @@ import {
   Play, ExternalLink, Users, Video, FileText, Smartphone, QrCode, Mail, Phone, MessageCircle,
   Download, Globe, Github, Linkedin, Award, Calendar, ArrowRight, Eye, Heart, Zap
 } from 'lucide-react';
+import StartupLikeButton from '../StartupLikeButton';
 
 interface StartupData {
   name: string;
@@ -290,9 +291,17 @@ const StartupProfile: React.FC = () => {
             </div>
 
             {/* Call-to-Actions */}
-            <div className="flex flex-wrap justify-center gap-4">
+            <div className="flex flex-wrap justify-center gap-4 items-center">
               {startup.productVideo && (
-                <button className="px-8 py-4 bg-gradient-to-r from-[#e86888] to-[#7d7eed] text-white rounded-full font-medium transition-all duration-300 hover:scale-105 flex items-center gap-3 shadow-lg">
+                <button 
+                  onClick={() => {
+                    const storySection = document.getElementById('why-we-built-this');
+                    if (storySection) {
+                      storySection.scrollIntoView({ behavior: 'smooth' });
+                    }
+                  }}
+                  className="px-8 py-4 bg-gradient-to-r from-[#e86888] to-[#7d7eed] text-white rounded-full font-medium transition-all duration-300 hover:scale-105 flex items-center gap-3 shadow-lg"
+                >
                   <Play size={24} />
                   Watch Product Video
                 </button>
@@ -314,13 +323,16 @@ const StartupProfile: React.FC = () => {
                 <Users size={24} />
                 Meet the Team
               </button>
+
+              {/* Like Button - Circular and center-aligned */}
+              <StartupLikeButton startupSlug={startup.slug} />
             </div>
           </motion.div>
         </div>
       </section>
 
       {/* 2. Product Introduction — Story Behind the Startup */}
-      <section className="py-20 px-6 bg-gradient-to-br from-gray-900 to-blue-900">
+      <section id="why-we-built-this" className="py-20 px-6 bg-gradient-to-br from-gray-900 to-blue-900">
         <div className="max-w-4xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 30 }}

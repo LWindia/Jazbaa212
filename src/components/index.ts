@@ -9,4 +9,5 @@ export { default as VisionSection } from './VisionSection';
 export { default as GallerySection } from './GallerySection';
 export { default as JoinSection } from './JoinSection';
 export { default as Footer } from './Footer';
-export { default as Logo } from './Logo'; 
+export { default as Logo } from './Logo';
+export { default as StartupLikeButton } from './StartupLikeButton'; 

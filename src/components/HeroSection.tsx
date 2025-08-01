@@ -74,7 +74,7 @@ const HeroSection = () => {
                     alt="YouTube Video Thumbnail"
                     className="w-full h-full object-cover"
                     onError={(e) => {
-                      e.target.src = `https://img.youtube.com/vi/${youtubeVideoId}/hqdefault.jpg`;
+                      (e.target as HTMLImageElement).src = `https://img.youtube.com/vi/${youtubeVideoId}/hqdefault.jpg`;
                     }}
                   />
                   <div className="absolute inset-0 bg-gradient-to-br from-purple-600/40 via-pink-500/30 to-purple-800/40"></div>

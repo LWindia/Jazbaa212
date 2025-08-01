@@ -26,6 +26,7 @@ import {
   AlertCircle
 } from 'lucide-react';
 import ContactFormModal from '../ContactFormModal';
+import StartupLikeButton from '../StartupLikeButton';
 
 interface StartupData {
   name: string;
@@ -255,9 +256,17 @@ const StartupProfileTemplate: React.FC = () => {
             {startup.tagline}
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-4">
+          <div className="flex flex-col sm:flex-row gap-4 items-center">
             {startup.productVideo && (
-              <button className="px-6 py-3 rounded-lg font-semibold flex items-center gap-2 text-white bg-gradient-to-r from-pink-400 to-purple-500 hover:scale-105 transform transition-all duration-300">
+              <button 
+                onClick={() => {
+                  const storySection = document.getElementById('why-we-built-this');
+                  if (storySection) {
+                    storySection.scrollIntoView({ behavior: 'smooth' });
+                  }
+                }}
+                className="px-6 py-3 rounded-lg font-semibold flex items-center gap-2 text-white bg-gradient-to-r from-pink-400 to-purple-500 hover:scale-105 transform transition-all duration-300"
+              >
                 <PlayCircle className="w-5 h-5" />
                 Watch Product Video
               </button>
@@ -285,6 +294,9 @@ const StartupProfileTemplate: React.FC = () => {
               <Users className="w-5 h-5" />
               Meet the Team
             </button>
+
+            {/* Like Button - Circular and center-aligned */}
+            <StartupLikeButton startupSlug={startup.slug} />
           </div>
         </div>
 
@@ -305,7 +317,7 @@ const StartupProfileTemplate: React.FC = () => {
       </div>
     </section>
       {/* Product Introduction */}
-      <section className="py-20 px-4">
+      <section id="why-we-built-this" className="py-20 px-4">
         <div className="max-w-6xl mx-auto">
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div>
